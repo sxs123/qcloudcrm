@@ -1,0 +1,68 @@
+<?php use \Tuanduimao\Loader\App as App; ?>
+<!DOCTYPE html>
+<hstml lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<?php include_once(APP::tpl('mobile/common/head')); ?>
+	<script type='text/javascript' src='http://res.wx.qq.com/open/js/jweixin-1.1.0.js' charset='utf-8'></script>
+
+</head>
+<body>
+
+<script>
+
+	wx.config({
+		debug: false, 
+		appId: '<?=$data["appid"]?>', 
+		timestamp: '<?=$data["timestamp"]?>' , 
+		nonceStr: '<?=$data["noncestr"]?>', 
+		signature: '<?=$data["signature"]?>',
+		jsApiList: [
+		"chooseImage",
+		"previewImage ",
+		"uploadImage",
+		"downloadImage",
+		]
+	});
+
+	wx.ready(function(){
+		wx.chooseImage({
+		    count: 1, // 默认9
+		    sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+		    sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+		    success: function (res) {
+		        var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+		        
+		        var id = localIds[0];
+
+		        readNameCard(id);
+			}
+		});
+
+		function readNameCard(id) {
+			wx.uploadImage({
+			    localId: id, // 需要上传的图片的本地ID，由chooseImage接口获得
+			    isShowProgressTips: 1, // 默认为1，显示进度提示
+			    success: function (res) {
+			    	$.showPreloader('识别中');
+					var serverId = res.serverId; 
+					// 返回图片的服务器端ID
+			        $.post("<?=App::PR('Mobcustomerdata','ocr')?>", {sid: serverId}, function(data) {
+						if (data['result_list']==""){
+							alert('图片识别失败');
+						}else{
+							// 跳转
+			    			window.location.href="<?=App::PR('Mobcustomerpanel','create')?>";
+						}
+
+			        }, 'json');
+			    }
+			});
+			
+		}
+
+	});
+</script>
+</body>
+</html>
