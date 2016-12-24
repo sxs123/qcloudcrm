@@ -11,6 +11,10 @@ class DefaultsController extends \Tuanduimao\Loader\Controller {
 	function __construct() {
 	}
 
+	function test() {
+		echo "Hello";
+	}
+
 	function index() {
 		$hello = App::M('Hello');
 		$data = $hello->select("LIMIT 20");
